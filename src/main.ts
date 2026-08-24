@@ -3,6 +3,8 @@ import type { IControl } from "maplibre-gl";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 
 import { createMap } from "./map/mapSetup";
+import { cullToViewport } from "./map/viewportCull";
+import { clusterFlights, type FlightCluster } from "./layers/screenCluster";
 import { buildLayers } from "./layers/flightLayers";
 import { OpenSkyPoller, REGIONS, fetchFlightRoute, type FlightState, type BBox } from "./data/opensky";
 import { resolveAirportLabel } from "./data/airports";
@@ -40,7 +42,9 @@ let currentBbox: BBox | null = REGIONS.europe.bbox;
 let lastFleetMeta: { updatedAt: number; error: string | null } = { updatedAt: Date.now(), error: null };
 
 function rebuildLayers() {
-  const layers = buildLayers({ flights, toggles: dashboard.toggles, selectedIcao24 });
+  const visible = cullToViewport(flights, map);
+  const clusters = clusterFlights(visible, map, selectedIcao24);
+  const layers = buildLayers({ clusters, toggles: dashboard.toggles, selectedIcao24 });
   overlay.setProps({ layers });
 }
 
@@ -92,9 +96,19 @@ async function loadRoute(f: FlightState) {
 // One handler, reading deck.gl's own pick result, has no such race.
 overlay.setProps({
   onClick: (info) => {
-    const f = info.object as FlightState | undefined;
-    if (f) selectFlight(f);
-    else clearSelection();
+    const c = info.object as FlightCluster | undefined;
+    if (!c) {
+      clearSelection();
+      return;
+    }
+    if (c.flights.length === 1) {
+      selectFlight(c.flights[0]);
+    } else {
+      // Clusters aren't individually selectable — zoom in on the group
+      // instead, which spreads its members apart in screen space and lets
+      // clusterFlights() dissolve it back into pickable individual planes.
+      map.easeTo({ center: [c.longitude, c.latitude], zoom: Math.min(map.getZoom() + 3, 14), duration: 600 });
+    }
   },
   onHover: (info) => {
     mapContainer.style.cursor = info.object ? "pointer" : "";

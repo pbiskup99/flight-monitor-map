@@ -1,7 +1,8 @@
-import { IconLayer } from "@deck.gl/layers";
+import { IconLayer, TextLayer } from "@deck.gl/layers";
 import type { Layer } from "@deck.gl/core";
 import type { FlightState } from "../data/opensky";
-import { buildPlaneIconAtlas } from "./planeIcon";
+import { type FlightCluster, clusterIconSize } from "./screenCluster";
+import { buildPlaneIconAtlas, CLUSTER_VARIANT } from "./planeIcon";
 
 const ICON_ATLAS = buildPlaneIconAtlas();
 
@@ -19,35 +20,45 @@ export interface LayerToggles {
 }
 
 export interface BuildLayersOptions {
-  // Positions are expected to already be smoothly interpolated per-frame
-  // (see FlightInterpolator) — this layer renders them as-is rather than
-  // running its own GPU position transition, since that interpolates by
-  // array index and gets confused by OpenSky's unstable ordering.
-  flights: FlightState[];
+  // Pre-clustered by clusterFlights() (screen-space, recomputed per rebuild)
+  // — a cluster of one renders as a normal heading-aware plane icon, 2+
+  // render as a single direction-less glyph with a count badge.
+  clusters: FlightCluster[];
   toggles: LayerToggles;
   selectedIcao24: string | null;
 }
 
 export function buildLayers(opts: BuildLayersOptions): Layer[] {
-  const { flights, toggles, selectedIcao24 } = opts;
+  const { clusters, toggles, selectedIcao24 } = opts;
   const layers: Layer[] = [];
 
   if (toggles.icons) {
     layers.push(
-      new IconLayer<FlightState>({
+      new IconLayer<FlightCluster>({
         id: "flight-icons",
-        data: flights,
+        data: clusters,
         iconAtlas: ICON_ATLAS.image,
         iconMapping: ICON_ATLAS.mapping,
-        getIcon: (f) => variantFor(f, f.icao24 === selectedIcao24),
-        getPosition: (f) => [f.longitude, f.latitude, (f.geoAltitude ?? 0) > 0 ? (f.geoAltitude as number) : 0],
+        getIcon: (c) =>
+          c.flights.length > 1 ? CLUSTER_VARIANT : variantFor(c.flights[0], c.flights[0].icao24 === selectedIcao24),
+        getPosition: (c) => {
+          const f = c.flights[0];
+          const altitude = c.flights.length === 1 && (f.geoAltitude ?? 0) > 0 ? (f.geoAltitude as number) : 0;
+          return [c.longitude, c.latitude, altitude];
+        },
         // deck.gl's IconLayer rotates counter-compass (increasing getAngle
         // turns the glyph counterclockwise), so a clockwise compass bearing
         // needs negating to render correctly — confirmed against real
         // known-heading aircraft plus the same fix reported by other
-        // deck.gl users converting compass headings for IconLayer.
-        getAngle: (f) => -(f.trueTrack ?? 0),
-        getSize: (f) => (f.icao24 === selectedIcao24 ? 34 : 20),
+        // deck.gl users converting compass headings for IconLayer. Clusters
+        // have no single heading, so they don't rotate at all.
+        getAngle: (c) => (c.flights.length > 1 ? 0 : -(c.flights[0].trueTrack ?? 0)),
+        getSize: (c) =>
+          c.flights.length > 1
+            ? clusterIconSize(c.flights.length)
+            : c.flights[0].icao24 === selectedIcao24
+              ? 34
+              : 20,
         sizeUnits: "pixels",
         pickable: true,
         autoHighlight: true,
@@ -60,6 +71,27 @@ export function buildLayers(opts: BuildLayersOptions): Layer[] {
         }
       })
     );
+
+    const clusterLabels = clusters.filter((c) => c.flights.length > 1);
+    if (clusterLabels.length > 0) {
+      layers.push(
+        new TextLayer<FlightCluster>({
+          id: "flight-cluster-labels",
+          data: clusterLabels,
+          getPosition: (c) => [c.longitude, c.latitude, 0],
+          getText: (c) => String(c.flights.length),
+          getSize: 12,
+          getColor: [255, 255, 255, 235],
+          fontFamily: "system-ui, sans-serif",
+          fontWeight: 700,
+          fontSettings: { sdf: true },
+          outlineWidth: 2,
+          outlineColor: [40, 30, 60, 255],
+          billboard: true,
+          pickable: false
+        })
+      );
+    }
   }
 
   return layers;
