@@ -24,7 +24,10 @@ export class Dashboard {
     flightFields: document.getElementById("flight-fields")!,
     flightFrom: document.getElementById("flight-from")!,
     flightTo: document.getElementById("flight-to")!,
-    flightClose: document.getElementById("flight-close")!
+    flightClose: document.getElementById("flight-close")!,
+    panel: document.getElementById("panel")!,
+    panelToggle: document.getElementById("panel-toggle")!,
+    panelTitle: document.getElementById("panel-title")!
   };
 
   private toggleIds: Array<[keyof Toggles, string]> = [["icons", "toggle-icons"]];
@@ -50,6 +53,19 @@ export class Dashboard {
 
     this.el.flightClose.addEventListener("click", () => {
       this.onDeselect?.();
+    });
+
+    // Mobile-only control (the button itself is display:none above the
+    // 760px breakpoint — see style.css) — the panel sits right under the
+    // header on a phone and would otherwise cover most of the map with no
+    // way to get it out of the way. Collapsed state relabels the section
+    // heading itself ("Layers" -> "Menu") rather than leaving a bare,
+    // unlabeled bar, so it's clear the strip is still interactive.
+    this.el.panelToggle.addEventListener("click", () => {
+      const collapsed = this.el.panel.classList.toggle("collapsed");
+      this.el.panelToggle.setAttribute("aria-expanded", String(!collapsed));
+      this.el.panelToggle.setAttribute("aria-label", collapsed ? "Expand menu" : "Collapse menu");
+      this.el.panelTitle.textContent = collapsed ? "Menu — tap to expand" : "Layers";
     });
   }
 

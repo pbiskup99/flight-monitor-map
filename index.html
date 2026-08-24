@@ -27,42 +27,58 @@
 
       <aside id="panel">
         <section class="panel-section">
-          <h2>Layers</h2>
-          <label class="toggle"><input type="checkbox" id="toggle-icons" checked /> Planes</label>
-        </section>
-
-        <section class="panel-section">
-          <h2>Region</h2>
-          <select id="region-select">
-            <option value="world">World</option>
-            <option value="europe" selected>Europe</option>
-            <option value="poland">Poland</option>
-            <option value="us">North America</option>
-            <option value="asia">East Asia</option>
-          </select>
-          <p class="hint">OpenSky Network limits request rates for anonymous clients — picking a smaller region reduces the query area and speeds up refresh.</p>
-        </section>
-
-        <section class="panel-section" id="flight-detail">
-          <div class="flight-detail-header">
-            <h2>Selected flight</h2>
-            <button id="flight-close" class="flight-close hidden" type="button" aria-label="Deselect plane">✕</button>
+          <div class="panel-section-header">
+            <h2 id="panel-title">Layers</h2>
+            <button
+              id="panel-toggle"
+              class="panel-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="panel-collapsible"
+              aria-label="Collapse menu"
+            >
+              <span class="chevron">⌄</span>
+            </button>
           </div>
-          <div id="flight-empty" class="hint">Click a plane on the map to see its details and 3D model.</div>
-          <div id="flight-info" class="flight-info hidden">
-            <canvas id="plane3d-canvas"></canvas>
-            <dl id="flight-route" class="route-info">
-              <div><dt>From</dt><dd id="flight-from">–</dd></div>
-              <div><dt>To</dt><dd id="flight-to">–</dd></div>
-            </dl>
-            <dl id="flight-fields"></dl>
+          <div id="panel-collapsible">
+            <label class="toggle"><input type="checkbox" id="toggle-icons" checked /> Planes</label>
           </div>
         </section>
 
-        <footer class="credits">
-          Data: <a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a> ·
-          Tiles: <a href="https://openfreemap.org/" target="_blank" rel="noopener">OpenFreeMap</a>
-        </footer>
+        <div id="panel-rest">
+          <section class="panel-section">
+            <h2>Region</h2>
+            <select id="region-select">
+              <option value="world">World</option>
+              <option value="europe" selected>Europe</option>
+              <option value="poland">Poland</option>
+              <option value="us">North America</option>
+              <option value="asia">East Asia</option>
+            </select>
+            <p class="hint">OpenSky Network limits request rates for anonymous clients — picking a smaller region reduces the query area and speeds up refresh.</p>
+          </section>
+
+          <section class="panel-section" id="flight-detail">
+            <div class="flight-detail-header">
+              <h2>Selected flight</h2>
+              <button id="flight-close" class="flight-close hidden" type="button" aria-label="Deselect plane">✕</button>
+            </div>
+            <div id="flight-empty" class="hint">Click a plane on the map to see its details and 3D model.</div>
+            <div id="flight-info" class="flight-info hidden">
+              <canvas id="plane3d-canvas"></canvas>
+              <dl id="flight-route" class="route-info">
+                <div><dt>From</dt><dd id="flight-from">–</dd></div>
+                <div><dt>To</dt><dd id="flight-to">–</dd></div>
+              </dl>
+              <dl id="flight-fields"></dl>
+            </div>
+          </section>
+
+          <footer class="credits">
+            Data: <a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a> ·
+            Tiles: <a href="https://openfreemap.org/" target="_blank" rel="noopener">OpenFreeMap</a>
+          </footer>
+        </div>
       </aside>
 
       <div id="loading" class="loading">Loading flight data…</div>

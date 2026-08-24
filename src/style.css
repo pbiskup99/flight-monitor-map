@@ -146,6 +146,39 @@ body {
   border-radius: 4px;
 }
 
+.panel-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.panel-section-header h2 {
+  margin: 0 0 10px;
+}
+
+.panel-toggle {
+  display: none; /* mobile-only — desktop has room to always show the panel */
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.panel-toggle .chevron {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+#panel.collapsed .panel-toggle .chevron {
+  transform: rotate(-90deg);
+}
+
 .panel-section {
   padding: 14px 0;
   border-bottom: 1px solid var(--gridline);
@@ -332,5 +365,19 @@ body {
   }
   .stats {
     display: none;
+  }
+  .panel-toggle {
+    display: flex;
+  }
+  #panel.collapsed {
+    max-height: none;
+  }
+  #panel.collapsed #panel-collapsible,
+  #panel.collapsed #panel-rest {
+    display: none;
+  }
+  #panel.collapsed .panel-section:first-of-type {
+    border-bottom: none;
+    padding-bottom: 14px;
   }
 }
