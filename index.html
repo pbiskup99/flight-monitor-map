@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Global Flight &amp; Atmosphere Monitor</title>
+    <meta name="description" content="Live global flight monitor — MapLibre GL, deck.gl and Three.js." />
+  </head>
+  <body>
+    <div id="app">
+      <div id="map"></div>
+
+      <header id="topbar">
+        <div class="brand">
+          <span class="brand-dot"></span>
+          <div>
+            <h1>Global Flight &amp; Atmosphere Monitor</h1>
+            <p class="subtitle">Live traffic — WebGL2 / MapLibre / deck.gl / Three.js</p>
+          </div>
+        </div>
+        <div id="stats" class="stats">
+          <div class="stat"><span class="stat-value" id="stat-planes">–</span><span class="stat-label">planes</span></div>
+          <div class="stat"><span class="stat-value" id="stat-updated">–</span><span class="stat-label">updated</span></div>
+          <div class="stat"><span class="stat-value" id="stat-fps">–</span><span class="stat-label">fps</span></div>
+        </div>
+      </header>
+
+      <aside id="panel">
+        <section class="panel-section">
+          <h2>Layers</h2>
+          <label class="toggle"><input type="checkbox" id="toggle-icons" checked /> Planes</label>
+        </section>
+
+        <section class="panel-section">
+          <h2>Region</h2>
+          <select id="region-select">
+            <option value="world">World</option>
+            <option value="europe" selected>Europe</option>
+            <option value="poland">Poland</option>
+            <option value="us">North America</option>
+            <option value="asia">East Asia</option>
+          </select>
+          <p class="hint">OpenSky Network limits request rates for anonymous clients — picking a smaller region reduces the query area and speeds up refresh.</p>
+        </section>
+
+        <section class="panel-section" id="flight-detail">
+          <div class="flight-detail-header">
+            <h2>Selected flight</h2>
+            <button id="flight-close" class="flight-close hidden" type="button" aria-label="Deselect plane">✕</button>
+          </div>
+          <div id="flight-empty" class="hint">Click a plane on the map to see its details and 3D model.</div>
+          <div id="flight-info" class="flight-info hidden">
+            <canvas id="plane3d-canvas"></canvas>
+            <dl id="flight-route" class="route-info">
+              <div><dt>From</dt><dd id="flight-from">–</dd></div>
+              <div><dt>To</dt><dd id="flight-to">–</dd></div>
+            </dl>
+            <dl id="flight-fields"></dl>
+          </div>
+        </section>
+
+        <footer class="credits">
+          Data: <a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a> ·
+          Tiles: <a href="https://openfreemap.org/" target="_blank" rel="noopener">OpenFreeMap</a>
+        </footer>
+      </aside>
+
+      <div id="loading" class="loading">Loading flight data…</div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

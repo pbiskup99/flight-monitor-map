@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Secrets — never commit real credentials.
+.env
+.env.local
+.env.*.local
+.idea
+.claude
