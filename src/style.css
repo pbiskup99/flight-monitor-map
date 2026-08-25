@@ -152,10 +152,6 @@ body {
   justify-content: space-between;
   gap: 8px;
 }
-.panel-section-header h2 {
-  margin: 0 0 10px;
-}
-
 .panel-toggle {
   display: none; /* mobile-only — desktop has room to always show the panel */
   align-items: center;

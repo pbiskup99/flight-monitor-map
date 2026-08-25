@@ -62,11 +62,26 @@ export class Dashboard {
     // heading itself ("Layers" -> "Menu") rather than leaving a bare,
     // unlabeled bar, so it's clear the strip is still interactive.
     this.el.panelToggle.addEventListener("click", () => {
-      const collapsed = this.el.panel.classList.toggle("collapsed");
-      this.el.panelToggle.setAttribute("aria-expanded", String(!collapsed));
-      this.el.panelToggle.setAttribute("aria-label", collapsed ? "Expand menu" : "Collapse menu");
-      this.el.panelTitle.textContent = collapsed ? "Menu — tap to expand" : "Layers";
+      this.setPanelCollapsed(!this.el.panel.classList.contains("collapsed"));
     });
+
+    // The collapse/expand behavior (and the toggle button itself) only
+    // applies below the 760px breakpoint — see the matching media query in
+    // style.css. If the panel was left collapsed and the viewport then
+    // widens past that breakpoint (window resize, device rotation/unfold),
+    // force it back to expanded so the "Menu — tap to expand" label doesn't
+    // get stuck on a layout where the toggle to undo it is hidden.
+    const mobileQuery = window.matchMedia("(max-width: 760px)");
+    mobileQuery.addEventListener("change", (e) => {
+      if (!e.matches) this.setPanelCollapsed(false);
+    });
+  }
+
+  private setPanelCollapsed(collapsed: boolean) {
+    this.el.panel.classList.toggle("collapsed", collapsed);
+    this.el.panelToggle.setAttribute("aria-expanded", String(!collapsed));
+    this.el.panelToggle.setAttribute("aria-label", collapsed ? "Expand menu" : "Collapse menu");
+    this.el.panelTitle.textContent = collapsed ? "Menu — tap to expand" : "Layers";
   }
 
   setLoading(loading: boolean, message?: string) {
